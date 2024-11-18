@@ -1,0 +1,83 @@
+// create random access token
+-- require('crypto').randomBytes(64).toString('hex')
+
+-- sign
+
+* jwt.sign is a method provided by JSON Web Token (JWT) libraries, 
+  such as the popular jsonwebtoken library in Node.js. 
+  It is used to create (sign) a new JWT.
+* A JWT is a compact, URL-safe way to transmit information between
+  parties as a JSON object. It is commonly used for authentication 
+  and secure information exchange.
+
+-- Syntax (Node.js jsonwebtoken library)
+
+* jwt.sign(payload, secretOrPrivateKey, [options, callback])
+
+-- Parameters
+1. payload (object or string):
+    * The data you want to include in the token.
+    * This could be user information (e.g., id, email) or claims.
+    * Example
+    -- { userId: 123, role: 'admin' }
+    * The payload is not encrypted, only base64-encoded and signed.
+    * what is encrypted ?
+    -- In Node.js, encryption is the process of 
+       converting plain text data into an unreadable form called ciphertext
+
+2. secretOrPrivateKey (string or buffer):
+    * The secret key or private key used to sign the token.
+    * For symmetric algorithms (e.g., HS256), it's a secret string shared between the 
+      signing and verifying parties.
+    * For asymmetric algorithms (e.g., RS256), it should be a private key.
+3. options (optional)
+    * An object specifying additional properties for the token.
+    * Example options
+        * algorithm: The signing algorithm (default: HS256).
+        * expiresIn: Token expiration time (e.g., '1h' or 3600 seconds).
+        * issuer, subject, audience: Claims to include in the token.
+        * Example:
+        -- { expiresIn: '1h', algorithm: 'HS256' }
+4. callback (optional, if asynchronous):
+    * A function to handle the result (error-first style). If not provided, jwt.sign returns 
+      the token synchronously.
+
+Example Usage:
+1. Basic Synchronous Signing:
+
+const jwt = require('jsonwebtoken');
+const payload = { userId: 123, role: 'admin' };
+const secretKey = 'your-very-secure-secret';
+
+const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+console.log(token);
+
+2. Asynchronous Signing:
+
+jwt.sign(payload, secretKey, { expiresIn: '1h' }, (err, token) => {
+    if (err) {
+        console.error('Error signing token:', err);
+    } else {
+        console.log('Generated Token:', token);
+    }
+});
+
+- How it Works:
+1. The payload is encoded into JSON.
+2. The library applies the chosen signing algorithm to combine:
+    * The payload
+    * A header (specifying algorithm and token type)
+    * The secretOrPrivateKey.
+3. The output is a signed JWT in the format:
+    -- HEADER.PAYLOAD.SIGNATURE
+
+Example JWT:
+-- eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywicm9sZSI6ImFkbWluIiwiaWF0IjoxNjkxNzgzNjAwLCJleHAiOjE2OTE3ODcyMDB9.2lFSV3i1Z1dmfkhT_zLhnGvMA8YF2KDfM3xX5nZhXYU
+
+Use Cases:
+    * Authentication: Include user data in the payload to verify identity.
+    * Authorization: Include roles or permissions to restrict access.
+    * Data exchange: Securely transmit claims between systems.
+
+Important: Always use strong keys and algorithms, and ensure the token is transmitted securely (e.g., via HTTPS).
+
